@@ -21,7 +21,7 @@ router.get(
   getOrderDetailsForAdmin
 );
 
-// Route to update the order status (only admins should have access)
+// Route to update the order status (only admins should have accesss)
 router.put("/update/:id", protect, role("admin", "vendor"), updateOrderStatus);
 
 module.exports = router;

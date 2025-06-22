@@ -43,6 +43,12 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+app.get("/scheduled-task", (req, res) => {
+  console.log("Scheduled task triggered!");
+  // Run your task here, e.g., database cleanup, sending emails, etc.
+  res.send("Task completed");
+});
+
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);

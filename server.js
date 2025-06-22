@@ -34,9 +34,9 @@ connectDB();
 
 app.use(
   cors({
-    origin: "https://fadeyibigbolahan.github.io/trustmart_frontend",
+    origin: "https://fadeyibigbolahan.github.io", // 🔥 Just the domain, not the full path
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    credentials: true, // ✅ needed if you send cookies or auth headers
   })
 );
 

@@ -34,7 +34,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://fadeyibigbolahan.github.io/trustmart_frontend",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })

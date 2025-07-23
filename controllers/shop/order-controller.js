@@ -183,6 +183,7 @@ const verifyOrderViaQuery = async (req, res) => {
       let order = await Order.findOne({ paymentId: paymentData.id });
 
       if (!order) {
+        // 1. Create Order
         order = new Order({
           userId: metadata.userId,
           cartItems: metadata.cartItems,
@@ -199,7 +200,23 @@ const verifyOrderViaQuery = async (req, res) => {
 
         await order.save();
 
-        // Clear cart after successful order
+        // 2. Credit vendors 90%
+        for (let item of metadata.cartItems) {
+          const product = await Product.findById(item.productId).populate(
+            "vendor"
+          );
+          const vendor = product?.vendor;
+
+          if (vendor) {
+            const totalItemAmount = item.quantity * item.price;
+            const vendorEarning = totalItemAmount * 0.9;
+
+            vendor.balance = (vendor.balance || 0) + vendorEarning;
+            await vendor.save();
+          }
+        }
+
+        // 3. Clear user's cart
         await Cart.findOneAndUpdate(
           { userId: metadata.userId },
           { $set: { items: [] } }

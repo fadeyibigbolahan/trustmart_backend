@@ -32,9 +32,14 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://fadeyibigbolahan.github.io",
+];
+
 app.use(
   cors({
-    origin: "https://fadeyibigbolahan.github.io", // 🔥 Just the domain, not the full path
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // ✅ needed if you send cookies or auth headers
   })

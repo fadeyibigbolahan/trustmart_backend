@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0, // Default wallet balance
   },
+  school: {
+    type: String,
+    required: true, // Assuming school is a required field
+  },
   roles: {
     type: [String],
     default: ["user"], // e.g., ['user'], ['user', 'vendor'], ['admin']

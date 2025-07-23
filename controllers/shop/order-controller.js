@@ -39,57 +39,11 @@ const initiatePaystackPayment = async (req, res) => {
       });
     }
 
-    // 🛒 Fetch products and populate vendor info
-    const productIds = cartItems.map((item) => item.productId);
-    const products = await Product.find({ _id: { $in: productIds } }).populate(
-      "vendor"
-    );
-
-    // 🧾 Prepare vendor split data
-    const vendorSplitMap = {};
-    for (let product of products) {
-      const vendor = product.vendor;
-      if (!vendor || !vendor.subaccountCode) {
-        return res.status(400).json({
-          success: false,
-          message: `Missing vendor or subaccountCode for product: ${product.title}`,
-        });
-      }
-
-      const cartItem = cartItems.find(
-        (item) => item.productId === product._id.toString()
-      );
-      if (!cartItem) continue;
-
-      const vendorId = vendor._id.toString();
-      const itemTotal = cartItem.quantity * cartItem.price;
-
-      if (!vendorSplitMap[vendorId]) {
-        vendorSplitMap[vendorId] = {
-          subaccountCode: vendor.subaccountCode,
-          totalShare: 0,
-        };
-      }
-
-      vendorSplitMap[vendorId].totalShare += itemTotal;
-    }
-
-    // 🎯 Format subaccounts for Paystack split
-    const subaccounts = Object.values(vendorSplitMap).map((vendor) => ({
-      subaccount: vendor.subaccountCode,
-      share: Math.round(vendor.totalShare * 100), // in Kobo
-    }));
-
-    // 🚀 Initialize Paystack transaction
+    // 🚀 Initialize Paystack transaction (without split)
     const response = await paystack.transaction.initialize({
       email: user.email,
       amount: totalAmountInKobo,
       callback_url: `${process.env.CLIENT_URL}/order/success`,
-      split: {
-        type: "flat",
-        currency: "NGN",
-        subaccounts,
-      },
       metadata: {
         userId,
         cartId,

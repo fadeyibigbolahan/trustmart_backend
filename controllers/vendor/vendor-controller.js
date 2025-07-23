@@ -35,25 +35,25 @@ const registerVendor = async (req, res) => {
     // }
 
     // === Create Paystack Subaccount ===
-    const subaccountPayload = {
-      business_name: storeName,
-      settlement_bank: req.body.bankCode,
-      account_number: req.body.accountNumber,
-      percentage_charge: 10, // Trustmart keeps 10%
-    };
+    // const subaccountPayload = {
+    //   business_name: storeName,
+    //   settlement_bank: req.body.bankCode,
+    //   account_number: req.body.accountNumber,
+    //   percentage_charge: 10, // Trustmart keeps 10%
+    // };
 
-    const paystackResponse = await axios.post(
-      "https://api.paystack.co/subaccount",
-      subaccountPayload,
-      {
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    // const paystackResponse = await axios.post(
+    //   "https://api.paystack.co/subaccount",
+    //   subaccountPayload,
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //   }
+    // );
 
-    const subaccountCode = paystackResponse.data.data.subaccount_code;
+    // const subaccountCode = paystackResponse.data.data.subaccount_code;
 
     const logoUrl = req.files?.logo?.[0]?.path || null;
     const certificateUrl = req.files?.businessCertificate?.[0]?.path || null;
@@ -65,7 +65,6 @@ const registerVendor = async (req, res) => {
       storeDescription,
       isApproved: false,
       balance: 0,
-      subaccountCode, // store for use during split payments
       logo: logoUrl,
       businessCertificate: certificateUrl,
     });

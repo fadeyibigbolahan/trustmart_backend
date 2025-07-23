@@ -89,7 +89,7 @@ const verifyPaystackPayment = async (req, res) => {
       cartId,
     } = req.body;
 
-    // 1. Verify transaction using Paystack API
+    // 1. Verify payment
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -102,13 +102,13 @@ const verifyPaystackPayment = async (req, res) => {
     const paymentData = response.data.data;
 
     if (paymentData.status === "success") {
-      // 2. Create order in DB
+      // 2. Create the order
       const newOrder = new Order({
         userId,
         cartId,
         cartItems,
         addressInfo,
-        orderStatus: orderStatus || "Processing",
+        orderStatus: orderStatus || "processing",
         paymentMethod: paymentMethod || "Paystack",
         paymentStatus: "Paid",
         totalAmount,
@@ -120,19 +120,35 @@ const verifyPaystackPayment = async (req, res) => {
 
       await newOrder.save();
 
-      res.status(201).json({
+      // 3. Credit vendor wallets
+      for (let item of cartItems) {
+        const product = await Product.findById(item.productId).populate(
+          "vendor"
+        );
+        const vendor = product?.vendor;
+
+        if (vendor) {
+          const totalItemAmount = item.quantity * item.price;
+          const vendorEarning = totalItemAmount * 0.9; // 90% to vendor
+
+          vendor.balance = (vendor.balance || 0) + vendorEarning;
+          await vendor.save();
+        }
+      }
+
+      return res.status(201).json({
         success: true,
-        message: "Payment verified and order created",
+        message: "Payment verified, order created, vendor(s) credited",
         orderId: newOrder._id,
       });
     } else {
-      res
+      return res
         .status(400)
         .json({ success: false, message: "Payment not successful" });
     }
   } catch (error) {
     console.error("Paystack verification failed:", error.message);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "An error occurred during verification",
     });

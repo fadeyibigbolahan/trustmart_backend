@@ -43,7 +43,7 @@ const initiatePaystackPayment = async (req, res) => {
     const response = await paystack.transaction.initialize({
       email: user.email,
       amount: totalAmountInKobo,
-      callback_url: `${process.env.CLIENT_URL}/order/success`,
+      callback_url: `https://fadeyibigbolahan.github.io/trustmart_frontend/order/success`,
       metadata: {
         userId,
         cartId,

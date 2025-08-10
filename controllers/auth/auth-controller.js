@@ -199,9 +199,10 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   const { token } = req.params;
-  const { newPassword } = req.body;
+  const { password } = req.body;
 
   try {
+    // Find user with matching valid token
     const user = await User.findOne({
       resetToken: token,
       resetTokenExpiry: { $gt: Date.now() },
@@ -213,12 +214,16 @@ const resetPassword = async (req, res) => {
         .json({ success: false, message: "Invalid or expired token" });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Update fields
     user.password = hashedPassword;
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
 
-    await user.save();
+    // Save without running full validation
+    await user.save({ validateBeforeSave: false });
 
     res.json({ success: true, message: "Password reset successful!" });
   } catch (err) {

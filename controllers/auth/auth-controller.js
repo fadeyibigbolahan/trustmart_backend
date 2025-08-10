@@ -162,9 +162,17 @@ const forgotPassword = async (req, res) => {
 
     user.resetToken = resetToken;
     user.resetTokenExpiry = resetTokenExpiry;
-    await user.save();
 
-    const resetLink = `http://yourdomain.com/reset-password/${resetToken}`;
+    await User.updateOne(
+      { email },
+      {
+        resetToken,
+        resetTokenExpiry,
+      },
+      { runValidators: false } // prevents checking required fields
+    );
+
+    const resetLink = `${process.env.CLIENT_URL}reset-password/${resetToken}`;
 
     // Setup email (basic transport)
     const transporter = nodemailer.createTransport({

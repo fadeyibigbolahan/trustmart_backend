@@ -3,15 +3,18 @@ const express = require("express");
 const {
   getFilteredProducts,
   getProductDetails,
+  getVendorProducts,
 } = require("../../controllers/shop/products-controller");
-const { protect } = require("../../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Route to get filtered products (no authentication required by default)
+// Get all products (with filters)
 router.get("/get", getFilteredProducts);
 
-// Route to get a single product details by ID (no authentication required by default)
+// Get vendor-specific products
+router.get("/vendor/:vendorId", getVendorProducts);
+
+// Get single product details
 router.get("/get/:id", getProductDetails);
 
 module.exports = router;

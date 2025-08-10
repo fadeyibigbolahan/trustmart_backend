@@ -1,5 +1,6 @@
 const Product = require("../../models/Product");
 
+// GET products by filters (category, brand, sorting)
 const getFilteredProducts = async (req, res) => {
   try {
     const { category = [], brand = [], sortBy = "price-lowtohigh" } = req.query;
@@ -19,22 +20,16 @@ const getFilteredProducts = async (req, res) => {
     switch (sortBy) {
       case "price-lowtohigh":
         sort.price = 1;
-
         break;
       case "price-hightolow":
         sort.price = -1;
-
         break;
       case "title-atoz":
         sort.title = 1;
-
         break;
-
       case "title-ztoa":
         sort.title = -1;
-
         break;
-
       default:
         sort.price = 1;
         break;
@@ -46,15 +41,16 @@ const getFilteredProducts = async (req, res) => {
       success: true,
       data: products,
     });
-  } catch (e) {
-    console.log(error);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Some error occured",
+      message: "Some error occurred",
     });
   }
 };
 
+// GET single product details
 const getProductDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -70,13 +66,40 @@ const getProductDetails = async (req, res) => {
       success: true,
       data: product,
     });
-  } catch (e) {
-    console.log(error);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Some error occured",
+      message: "Some error occurred",
     });
   }
 };
 
-module.exports = { getFilteredProducts, getProductDetails };
+// GET all products for a specific vendor
+const getVendorProducts = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+
+    const products = await Product.find({ vendor: vendorId });
+
+    if (!products.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found for this vendor",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred",
+    });
+  }
+};
+
+module.exports = { getFilteredProducts, getProductDetails, getVendorProducts };

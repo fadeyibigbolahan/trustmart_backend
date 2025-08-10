@@ -172,7 +172,7 @@ const forgotPassword = async (req, res) => {
       { runValidators: false } // prevents checking required fields
     );
 
-    const resetLink = `${process.env.CLIENT_URL}reset-password/${resetToken}`;
+    const resetLink = `${process.env.CLIENT_URL}#/auth/reset-password/${resetToken}`;
 
     // Setup email (basic transport)
     const transporter = nodemailer.createTransport({

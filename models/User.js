@@ -27,6 +27,8 @@ const UserSchema = new mongoose.Schema({
     type: [String],
     default: ["user"], // e.g., ['user'], ['user', 'vendor'], ['admin']
   },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Date },
 });
 
 const User = mongoose.model("User", UserSchema);

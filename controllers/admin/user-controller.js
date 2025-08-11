@@ -35,7 +35,39 @@ const fetchAllVendors = async (req, res) => {
   }
 };
 
+const updateVendorApproval = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const { status } = req.body; // true for approve, false for disapprove
+    console.log("Updating vendor status:", vendorId, status);
+
+    if (typeof status !== "boolean") {
+      return res.status(400).json({ message: "Status must be true or false" });
+    }
+
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    vendor.isApproved = status;
+    await vendor.save();
+
+    res.status(200).json({
+      message: `Vendor ${status ? "approved" : "disapproved"} successfully`,
+      vendor,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Error updating vendor status",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   fetchAllUsers,
   fetchAllVendors,
+  updateVendorApproval,
 };

@@ -37,12 +37,15 @@ const addProduct = async (req, res) => {
     const vendor = await Vendor.findOne({ user: req.user._id });
 
     if (!vendor) {
-      return res.status(404).json({ message: "Vendor profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Vendor profile not found" });
     }
 
     // ✅ Only allow approved vendors
     if (!vendor.isApproved) {
       return res.status(403).json({
+        success: false,
         message:
           "Your vendor account is not approved yet. Please wait for approval before adding products.",
       });
@@ -50,6 +53,7 @@ const addProduct = async (req, res) => {
 
     if (!title || !price || !req.files || req.files.length === 0) {
       return res.status(400).json({
+        success: false,
         message: "Title, price, and at least one image are required.",
       });
     }
@@ -73,6 +77,7 @@ const addProduct = async (req, res) => {
 
     console.log("product saved");
     res.status(201).json({
+      success: true,
       message: "Product created successfully.",
       product,
     });

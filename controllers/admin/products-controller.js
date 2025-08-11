@@ -34,22 +34,18 @@ const addProduct = async (req, res) => {
       totalStock,
     } = req.body;
 
-    console.log(
-      "details",
-      title,
-      description,
-      category,
-      brand,
-      price,
-      salePrice,
-      totalStock
-    );
-
     const vendor = await Vendor.findOne({ user: req.user._id });
 
-    console.log("vendor", vendor);
     if (!vendor) {
       return res.status(404).json({ message: "Vendor profile not found" });
+    }
+
+    // ✅ Only allow approved vendors
+    if (!vendor.isApproved) {
+      return res.status(403).json({
+        message:
+          "Your vendor account is not approved yet. Please wait for approval before adding products.",
+      });
     }
 
     if (!title || !price || !req.files || req.files.length === 0) {

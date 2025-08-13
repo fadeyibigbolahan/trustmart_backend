@@ -1,5 +1,7 @@
 const Vendor = require("../../models/Vendor");
 const User = require("../../models/User");
+const Product = require("../../models/Product");
+const Order = require("../../models/Order");
 const axios = require("axios");
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
@@ -85,14 +87,62 @@ const registerVendor = async (req, res) => {
 };
 
 const getMyVendorProfile = async (req, res) => {
-  console.log("ven profile");
-  const vendor = await Vendor.findOne({ user: req.user._id }).populate(
-    "user",
-    "name email"
-  );
-  if (!vendor)
-    return res.status(404).json({ message: "Vendor profile not found." });
-  res.json({ vendor });
+  try {
+    const vendor = await Vendor.findOne({ user: req.user._id }).populate(
+      "user",
+      "name email"
+    );
+
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor profile not found." });
+    }
+
+    // Step 1: Get vendor product IDs as strings
+    const vendorProducts = await Product.find({ vendor: vendor._id }, "_id");
+    const productIds = vendorProducts.map((p) => p._id.toString());
+
+    // Step 2: Get orders containing any vendor product
+    const orders = await Order.find({
+      "cartItems.productId": { $in: productIds },
+    });
+
+    let totalOrders = orders.length;
+    let totalSalesCount = 0;
+    let totalMoneyMade = 0;
+
+    orders.forEach((order) => {
+      // Filter cart items belonging to this vendor
+      const vendorItems = order.cartItems.filter(
+        (item) => productIds.includes(item.productId.trim()) // match strings
+      );
+
+      // If completed, count as a sale and add money made
+      if (order.orderStatus?.toLowerCase() === "delivered") {
+        totalSalesCount++;
+        vendorItems.forEach((item) => {
+          // Remove currency symbols and convert to number
+          const priceNum = parseFloat(
+            (item.price || "0").replace(/[^0-9.]/g, "")
+          );
+          totalMoneyMade += priceNum * (item.quantity || 0);
+        });
+      }
+    });
+
+    res.json({
+      vendor,
+      stats: {
+        totalMoneyMade,
+        balance: vendor.balance,
+        totalSalesCount,
+        totalProducts: vendorProducts.length,
+        totalOrders,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 const getAllVendors = async (req, res) => {

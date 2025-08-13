@@ -148,6 +148,7 @@ const authMiddleware = async (req, res, next) => {
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  console.log("Forgot password request for email:", email);
 
   try {
     const user = await User.findOne({ email });
@@ -172,7 +173,9 @@ const forgotPassword = async (req, res) => {
       { runValidators: false } // prevents checking required fields
     );
 
+    console.log("Got here:", resetToken);
     const resetLink = `${process.env.CLIENT_URL}#/auth/reset-password/${resetToken}`;
+    console.log("Reset link:", resetLink);
 
     // Setup email (basic transport)
     const transporter = nodemailer.createTransport({
@@ -183,12 +186,16 @@ const forgotPassword = async (req, res) => {
       },
     });
 
+    console.log("got here, pass auth (user and pass)");
+
     await transporter.sendMail({
       to: user.email,
       subject: "Password Reset",
       html: `<p>You requested a password reset.</p>
              <p><a href="${resetLink}">Click here to reset your password</a></p>`,
     });
+
+    console.log("Password reset email sent:", user.email);
 
     res.json({ success: true, message: "Reset email sent!" });
   } catch (err) {

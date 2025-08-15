@@ -2,6 +2,7 @@ const Vendor = require("../../models/Vendor");
 const User = require("../../models/User");
 const Product = require("../../models/Product");
 const Order = require("../../models/Order");
+const WithdrawalRequest = require("../../models/WithdrawalRequest");
 const axios = require("axios");
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
@@ -178,9 +179,45 @@ const approveVendor = async (req, res) => {
   });
 };
 
+const requestWithdrawal = async (req, res) => {
+  try {
+    const { amount, bankAccount, accountHolder, bankName, note } = req.body;
+    console.log("Withdrawal request data:", {
+      amount,
+      bankAccount,
+      accountHolder,
+      bankName,
+      note,
+    });
+    const vendor = await Vendor.findOne({ user: req.user._id });
+
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+    if (amount > vendor.balance) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+
+    const withdrawal = await WithdrawalRequest.create({
+      vendor: vendor._id,
+      amount,
+      bankAccount,
+      accountHolder,
+      bankName,
+      note,
+    });
+
+    res.status(201).json({
+      message: "Withdrawal request submitted successfully",
+      withdrawal,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   registerVendor,
   getMyVendorProfile,
   getAllVendors,
   approveVendor,
+  requestWithdrawal,
 };

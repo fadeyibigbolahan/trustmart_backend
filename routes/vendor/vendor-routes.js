@@ -5,6 +5,7 @@ const {
   getMyVendorProfile,
   getAllVendors,
   approveVendor,
+  requestWithdrawal,
 } = require("../../controllers/vendor/vendor-controller");
 const { protect, role } = require("../../middlewares/authMiddleware");
 const upload = require("../../middlewares/upload");
@@ -30,5 +31,8 @@ router.get("/", protect, role("admin"), getAllVendors);
 
 // Route: PUT /api/vendors/:id/approve (admin only)
 router.put("/:id/approve", protect, role("admin"), approveVendor);
+
+// Route: POST /api/vendors/me/withdrawals
+router.post("/me/withdrawals", protect, requestWithdrawal);
 
 module.exports = router;

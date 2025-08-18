@@ -36,7 +36,8 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://fadeyibigbolahan.github.io",
+  "https://trustmart.com.ng",
+  "http://trustmart.com.ng",
 ];
 
 app.use(
